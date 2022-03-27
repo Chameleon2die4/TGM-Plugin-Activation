@@ -226,13 +226,6 @@ class TGMPA
 
 					// When the rest of WP has loaded, kick-start the rest of the class.
 					add_action( 'init', array( $this, 'init' ) );
-
-
-				if ( did_action( 'plugins_loaded' ) ) {
-					self::activation();
-				} else {
-					add_action( 'plugins_loaded', [__CLASS__, 'activation'] );
-				}
 			}
 
 			/**
