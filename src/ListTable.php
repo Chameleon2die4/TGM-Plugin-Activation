@@ -1,10 +1,15 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
+/** @noinspection GrazieInspection */
+/** @noinspection PhpMissingParamTypeInspection */
+
+/** @noinspection DuplicatedCode */
 
 namespace TGMPA;
 
 use WP_List_Table;
 
-if ( ! class_exists( 'WP_List_Table' ) ) {
+if (!class_exists('WP_List_Table')) {
+		/** @noinspection PhpIncludeInspection */
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
@@ -17,7 +22,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
  * Gives users an interface similar to the Plugin Administration
  * area with similar (albeit stripped down) capabilities.
  *
- * This class also allows for the bulk install of plugins.
+ * This class also allows for the bulk installation of plugins.
  *
  * @since 2.2.0
  *
@@ -361,7 +366,7 @@ class ListTable extends WP_List_Table
 						if (!empty($text)) {
 
 								$status_links[$type] = sprintf(
-									'<a href="%s"%s>%s</a>',
+								/** @lang text */ '<a href="%s"%s>%s</a>',
 									esc_url($this->tgmpa->get_tgmpa_status_url($type)),
 									($type === $this->view_context) ? ' class="current"' : '',
 									sprintf($text, number_format_i18n($count))
@@ -431,6 +436,7 @@ class ListTable extends WP_List_Table
 		 * @return string HTML-formatted version information.
 		 * @since 2.5.0
 		 *
+		 * @noinspection PhpUnused
 		 */
 		public function column_version($item)
 		{
@@ -488,7 +494,7 @@ class ListTable extends WP_List_Table
 		 * are left for interaction.
 		 *
 		 * Hides the menu item to prevent the user from clicking and
-		 * getting a permissions error.
+		 * getting a permission's error.
 		 *
 		 * @since 2.2.0
 		 */
@@ -496,7 +502,7 @@ class ListTable extends WP_List_Table
 		{
 				echo esc_html__('No plugins to install, update or activate.',
 						'tgmpa') . ' <a href="' . esc_url(self_admin_url()) . '"> ' . esc_html($this->tgmpa->strings['dashboard']) . '</a>';
-				echo '<style type="text/css">#adminmenu .wp-submenu li.current { display: none !important; }</style>';
+				echo '<style>#adminmenu .wp-submenu li.current { display: none !important; }</style>';
 		}
 
 		/**
@@ -644,6 +650,7 @@ class ListTable extends WP_List_Table
 		 *
 		 * @since 2.5.0
 		 *
+		 * @noinspection PhpUnusedParameterInspection
 		 */
 		public function wp_plugin_update_row($slug, $item)
 		{
@@ -660,6 +667,8 @@ class ListTable extends WP_List_Table
 						</div>
 					</td>
 				</tr>';
+
+				return null;
 		}
 
 		/**
@@ -713,6 +722,7 @@ class ListTable extends WP_List_Table
 		 * through if a user has to use WP_Filesystem to enter their credentials.
 		 *
 		 * @since 2.2.0
+		 * @noinspection PhpCastIsUnnecessaryInspection
 		 */
 		public function process_bulk_actions()
 		{
@@ -842,8 +852,8 @@ class ListTable extends WP_List_Table
 						unset($slug, $name, $source);
 
 						// Create a new instance of TGMPA_Bulk_Installer.
-						$installer = new TGMPA_Bulk_Installer(
-							new TGMPA_Bulk_Installer_Skin(
+						$installer = new BulkInstaller(
+							new BulkInstallerSkin(
 								array(
 									'url'          => esc_url_raw($this->tgmpa->get_tgmpa_url()),
 									'nonce'        => 'bulk-' . $this->_args['plural'],
@@ -890,11 +900,9 @@ class ListTable extends WP_List_Table
 						}
 
 						// Grab plugin data from $_POST.
-						$plugins = array();
-						if (isset($_POST['plugin'])) {
-								$plugins = array_map('urldecode', (array)$_POST['plugin']);
-								$plugins = array_map(array($this->tgmpa, 'sanitize_key'), $plugins);
-						}
+						$plugins = array_map('urldecode', (array)$_POST['plugin']);
+						$plugins = array_map(array($this->tgmpa, 'sanitize_key'), $plugins);
+
 
 						$plugins_to_activate = array();
 						$plugin_names = array();
@@ -988,6 +996,7 @@ class ListTable extends WP_List_Table
 		 * @deprecated 2.5.0 use {@see TGM_Plugin_Activation::_get_plugin_data_from_name()} instead.
 		 * @see        TGM_Plugin_Activation::_get_plugin_data_from_name()
 		 *
+		 * @noinspection PhpUnused
 		 */
 		protected function _get_plugin_data_from_name($name, $data = 'slug')
 		{

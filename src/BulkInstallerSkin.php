@@ -2,12 +2,15 @@
 
 namespace TGMPA;
 
+use Bulk_Upgrader_Skin;
+
 if ( ! class_exists( 'Bulk_Upgrader_Skin', false ) ) {
+		/** @noinspection PhpIncludeInspection */
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader-skins.php';
 }
 
 /**
- * Installer skin to set strings for the bulk plugin installations..
+ * Installer skin to set strings for the bulk plugin installations.
  *
  * Extends Bulk_Upgrader_Skin and customizes to suit the installation of multiple
  * plugins.
@@ -91,10 +94,11 @@ class BulkInstallerSkin extends Bulk_Upgrader_Skin {
 		/**
 		 * Sets install skin strings for each individual plugin.
 		 *
-		 * Checks to see if the automatic activation flag is set and uses the
+		 * Checks to see if the automatic activation flag is set and uses
 		 * the proper strings accordingly.
 		 *
 		 * @since 2.2.0
+		 * @noinspection DuplicatedCode
 		 */
 		public function add_strings() {
 				if ( 'update' === $this->options['install_type'] ) {
@@ -127,7 +131,12 @@ class BulkInstallerSkin extends Bulk_Upgrader_Skin {
 
 						// Add "read more" link only for WP < 4.8.
 						if ( version_compare( $this->tgmpa->wp_version, '4.8', '<' ) ) {
-								$this->upgrader->strings['skin_update_successful'] .= ' <a href="#" class="hide-if-no-js" onclick="%2$s"><span>' . esc_html__( 'Show Details', 'tgmpa' ) . '</span><span class="hidden">' . esc_html__( 'Hide Details', 'tgmpa' ) . '</span>.</a>';
+								$this->upgrader->strings['skin_update_successful'] .= /** @lang text */
+									' <a href="#" class="hide-if-no-js" onclick="%2$s"><span>'
+									. esc_html__( 'Show Details', 'tgmpa' )
+									. '</span><span class="hidden">'
+									. esc_html__( 'Hide Details', 'tgmpa' )
+									. '</span>.</a>';
 						}
 				}
 		}
@@ -174,7 +183,7 @@ class BulkInstallerSkin extends Bulk_Upgrader_Skin {
 				// Serve up the string to say installations (and possibly activations) are complete.
 				parent::bulk_footer();
 
-				// Flush plugins cache so we can make sure that the installed plugins list is always up to date.
+				// Flush plugins cache, so we can make sure that the installed plugins list is always up-to-date.
 				wp_clean_plugins_cache();
 
 				$this->tgmpa->show_tgmpa_version();
@@ -184,7 +193,7 @@ class BulkInstallerSkin extends Bulk_Upgrader_Skin {
 
 				if ( $this->tgmpa->is_tgmpa_complete() ) {
 						// All plugins are active, so we display the complete string and hide the menu to protect users.
-						echo '<style type="text/css">#adminmenu .wp-submenu li.current { display: none !important; }</style>';
+						echo '<style>#adminmenu .wp-submenu li.current { display: none !important; }</style>';
 						$update_actions['dashboard'] = sprintf(
 							esc_html( $this->tgmpa->strings['complete'] ),
 							'<a href="' . esc_url( self_admin_url() ) . '">' . esc_html( $this->tgmpa->strings['dashboard'] ) . '</a>'
@@ -216,6 +225,7 @@ class BulkInstallerSkin extends Bulk_Upgrader_Skin {
 		 * @since      2.2.0
 		 * @deprecated 2.5.0 use {@see Bulk_Upgrader_Skin::flush_output()} instead
 		 * @see        Bulk_Upgrader_Skin::flush_output()
+		 * @noinspection PhpUnused
 		 */
 		public function before_flush_output() {
 				_deprecated_function( __FUNCTION__, 'TGMPA 2.5.0', 'Bulk_Upgrader_Skin::flush_output()' );

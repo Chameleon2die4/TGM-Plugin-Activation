@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection DuplicatedCode */
 
 namespace TGMPA;
 
@@ -39,7 +39,7 @@ class Utils
 		 * @param string $string Text to be wrapped.
 		 * @return string
 		 */
-		public static function wrap_in_em( $string ) {
+		public static function wrap_in_em( string $string ) {
 				return '<em>' . wp_kses_post( $string ) . '</em>';
 		}
 
@@ -53,7 +53,7 @@ class Utils
 		 * @param string $string Text to be wrapped.
 		 * @return string
 		 */
-		public static function wrap_in_strong( $string ) {
+		public static function wrap_in_strong( string $string ) {
 				return '<strong>' . wp_kses_post( $string ) . '</strong>';
 		}
 
@@ -109,9 +109,9 @@ class Utils
 
 				if ( is_bool( $value ) ) {
 						return $value;
-				} elseif ( is_int( $value ) && ( 0 === $value || 1 === $value ) ) {
+				} elseif ( 0 === $value || 1 === $value ) {
 						return (bool) $value;
-				} elseif ( ( is_float( $value ) && ! is_nan( $value ) ) && ( (float) 0 === $value || (float) 1 === $value ) ) {
+				} elseif ( (! is_nan( $value )) && ( 0.0 === $value || 1.0 === $value ) ) {
 						return (bool) $value;
 				} elseif ( is_string( $value ) ) {
 						$value = trim( $value );

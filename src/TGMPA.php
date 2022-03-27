@@ -1,4 +1,6 @@
-<?php /** @noinspection DuplicatedCode */
+<?php /** @noinspection SpellCheckingInspection */
+/** @noinspection PhpIncludeInspection */
+/** @noinspection DuplicatedCode */
 
 /** @noinspection PhpUndefinedFunctionInspection */
 
@@ -1242,7 +1244,7 @@ class TGMPA
 					unset($plugin_slug);
 
 					$count = count($plugin_group);
-					$linked_plugins = array_map(array('Utils', 'wrap_in_em'), $linked_plugins);
+					$linked_plugins = array_map(['\TGMPA\Utils', 'wrap_in_em'], $linked_plugins);
 					$last_plugin = array_pop($linked_plugins); // Pop off last name to prep for readability.
 					$imploded = empty($linked_plugins) ? $last_plugin : (implode(', ', $linked_plugins) . ' ' . esc_html_x('and',
 									'plugin A *and* plugin B', 'tgmpa') . ' ' . $last_plugin);
@@ -1281,7 +1283,7 @@ class TGMPA
 	 * @param int $install_count Number of plugins to install.
 	 * @param int $update_count Number of plugins to update.
 	 * @param int $activate_count Number of plugins to activate.
-	 * @param int $line_template Template for the HTML tag to output a line.
+	 * @param string $line_template Template for the HTML tag to output a line.
 	 * @return string Action links.
 	 * @since 2.6.0
 	 *
@@ -1290,7 +1292,7 @@ class TGMPA
 			int $install_count,
 			int $update_count,
 			int $activate_count,
-			int $line_template
+			string $line_template
 	) {
 		// Setup action links.
 		$action_links = array(
@@ -1706,27 +1708,27 @@ class TGMPA
 	{
 		$api = []; // Cache received responses.
 
-			if (!function_exists('plugins_api')) {
-				require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-			}
+		if (!function_exists('plugins_api')) {
+			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		}
 
-			$response = plugins_api(
-					'plugin_information',
-					array(
-							'slug'   => $slug,
-							'fields' => array(
-									'sections' => false,
-							),
-					)
-			);
+		$response = plugins_api(
+				'plugin_information',
+				array(
+						'slug'   => $slug,
+						'fields' => array(
+								'sections' => false,
+						),
+				)
+		);
 
-			$api[$slug] = false;
+		$api[$slug] = false;
 
-			if (is_wp_error($response)) {
-				wp_die(esc_html($this->strings['oops']));
-			} else {
-				$api[$slug] = $response;
-			}
+		if (is_wp_error($response)) {
+			wp_die(esc_html($this->strings['oops']));
+		} else {
+			$api[$slug] = $response;
+		}
 
 		return $api[$slug];
 	}
@@ -2206,6 +2208,108 @@ class TGMPA
 
 	public static function activation()
 	{
-		$GLOBALS['tgmpa'] = self::get_instance();
+		$instance = self::get_instance();
+		$GLOBALS['tgmpa'] = $instance;
+
+		$plugins = self::loadPlugins();
+		foreach ($plugins as $plugin) {
+			call_user_func(array($instance, 'register'), $plugin);
+		}
 	}
+
+	public static function loadPlugins()
+	{
+		$templates = [
+				'plugins.json',
+				'plugins.php',
+				'config/plugins.php',
+				'config/plugins.json',
+		];
+		$templates = apply_filters('tgmpa_plugins_json', $templates);
+
+		$config = locate_template($templates);
+
+		if (!empty($config)) {
+			$name = basename($config);
+			$ext = explode('.', $name)[1];
+
+			if ($ext === 'json') {
+				return json_decode(file_get_contents($config), JSON_OBJECT_AS_ARRAY);
+			} elseif ($ext === 'php') {
+				return require_once($config);
+			}
+		}
+
+		return [];
+	}
+
+	/**
+	 * @return void
+	 * @noinspection PhpUnused
+	 */
+	public static function saveCurrentPlugins()
+	{
+		$plugins = self::getActivePlugins();
+		self::writeArrayToFile($plugins['active']);
+	}
+
+	public static function writeArrayToFile($arr)
+	{
+		$path = get_stylesheet_directory() . '/config/' . 'plugins.php';
+		$file = fopen($path, "a");
+
+		fwrite($file, "<?php" . PHP_EOL);
+		fwrite($file, PHP_EOL);
+		fwrite($file, "return [" . PHP_EOL);
+
+		foreach ($arr as $item) {
+			fwrite($file, " [" . PHP_EOL);
+
+			fwrite($file, " \"name\" => \"{$item['name']}\"," . PHP_EOL);
+			fwrite($file, " \"slug\" => \"{$item['slug']}\"," . PHP_EOL);
+			fwrite($file, " \"version\" => \"{$item['version']}\"," . PHP_EOL);
+
+			fwrite($file, " ]," . PHP_EOL);
+		}
+
+		fwrite($file, "];" . PHP_EOL);
+		fclose($file);
+	}
+
+	/**
+	 * @return array|array[]
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
+	 */
+	public static function getActivePlugins()
+	{
+		$activated = \get_option('active_plugins');
+		$all_plugins = \get_plugins();
+
+		$plugins = [
+				'active'   => [],
+				'inactive' => [],
+				'all'      => [],
+		];
+
+		foreach ($all_plugins as $key => $plugin) {
+			if (dirname($key) !== 'plugins-loader') {
+				$card = [
+						'name'    => $plugin['Name'],
+						'slug'    => dirname($key),
+						'version' => $plugin['Version'],
+				];
+
+				if (in_array($key, $activated)) {
+					$plugins['active'][] = $card;
+				} else {
+					$plugins['inactive'][] = $card;
+				}
+
+				$plugins['all'][] = $card;
+			}
+		}
+
+		return $plugins;
+	}
+
 }

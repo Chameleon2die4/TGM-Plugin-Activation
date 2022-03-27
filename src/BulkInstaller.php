@@ -1,8 +1,14 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
+
+/** @noinspection DuplicatedCode */
 
 namespace TGMPA;
 
+use Bulk_Upgrader_Skin;
+use Plugin_Upgrader;
+
 if ( ! class_exists( 'Plugin_Upgrader', false ) ) {
+		/** @noinspection PhpIncludeInspection */
 		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 }
 
@@ -51,7 +57,7 @@ class BulkInstaller extends Plugin_Upgrader {
 		protected $tgmpa;
 
 		/**
-		 * Whether or not the destination directory needs to be cleared ( = on update).
+		 * Whether the destination directory needs to be cleared ( = on update).
 		 *
 		 * @since 2.5.0
 		 *
@@ -64,7 +70,7 @@ class BulkInstaller extends Plugin_Upgrader {
 		 *
 		 * @since 2.2.0
 		 *
-		 * @param \Bulk_Upgrader_Skin|null $skin Installer skin.
+		 * @param Bulk_Upgrader_Skin|null $skin Installer skin.
 		 */
 		public function __construct( $skin = null ) {
 				// Get TGMPA class instance.
@@ -125,7 +131,7 @@ class BulkInstaller extends Plugin_Upgrader {
 		 *
 		 * {@internal This is basically a near identical copy of the WP Core
 		 * Plugin_Upgrader::bulk_upgrade() method, with minor adjustments to deal with
-		 * new installs instead of upgrades.
+		 * new installations instead of upgrades.
 		 * For ease of future synchronizations, the adjustments are clearly commented, but no other
 		 * comments are added. Code style has been made to comply.}}
 		 *
@@ -137,7 +143,7 @@ class BulkInstaller extends Plugin_Upgrader {
 		 * @param array $args    Arbitrary passed extra arguments.
 		 * @return array|false   Install confirmation messages on success, false on failure.
 		 */
-		public function bulk_install( $plugins, $args = array() ) {
+		public function bulk_install( array $plugins, array $args = array() ) {
 				// [TGMPA + ] Hook auto-activation in.
 				add_filter( 'upgrader_post_install', array( $this, 'auto_activate' ), 10 );
 
@@ -264,11 +270,11 @@ class BulkInstaller extends Plugin_Upgrader {
 
 				$this->skin->footer();
 
-				// Cleanup our hooks, in case something else does a upgrade on this connection.
+				// Cleanup our hooks, in case something else does an upgrade on this connection.
 				/* [TGMPA - ] remove_filter('upgrader_clear_destination', array($this, 'delete_old_plugin')); */
 
 				// [TGMPA + ] Remove our auto-activation hook.
-				remove_filter( 'upgrader_post_install', array( $this, 'auto_activate' ), 10 );
+				remove_filter( 'upgrader_post_install', array( $this, 'auto_activate' ) );
 
 				// Force refresh of plugin update information.
 				wp_clean_plugins_cache( $parsed_args['clear_update_cache'] );
@@ -285,7 +291,7 @@ class BulkInstaller extends Plugin_Upgrader {
 		 *
 		 * @param array $plugins The local WP file_path's of the plugins which should be upgraded.
 		 * @param array $args    Arbitrary passed extra arguments.
-		 * @return string|bool Install confirmation messages on success, false on failure.
+		 * @return array|bool Install confirmation messages on success, false on failure.
 		 */
 		public function bulk_upgrade( $plugins, $args = array() ) {
 
@@ -293,7 +299,7 @@ class BulkInstaller extends Plugin_Upgrader {
 
 				$result = parent::bulk_upgrade( $plugins, $args );
 
-				remove_filter( 'upgrader_post_install', array( $this, 'auto_activate' ), 10 );
+				remove_filter( 'upgrader_post_install', array( $this, 'auto_activate' ) );
 
 				return $result;
 		}
@@ -308,7 +314,7 @@ class BulkInstaller extends Plugin_Upgrader {
 		 * @param bool $bool The value we need to give back (true).
 		 * @return bool
 		 */
-		public function auto_activate( $bool ) {
+		public function auto_activate( bool $bool ) {
 				// Only process the activation of installed plugins if the automatic flag is set to true.
 				if ( $this->tgmpa->is_automatic ) {
 						// Flush plugins cache so the headers of the newly installed plugins will be read correctly.
